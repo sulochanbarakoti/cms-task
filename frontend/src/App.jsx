@@ -17,25 +17,20 @@ function App() {
     example: "",
   });
 
-  // const fetchContent = async (query) => {
-  //   const response = await axios.get(
-  //     `http://localhost:9000/api/${query ? `search?query=${query}` : "content"}`
-  //   );
-  //   setContent(response.data);
-  //   console.log(response.data);
-  // };
-
   const handleEdit = (item) => {
     setEditItem(item);
     setForm(item);
   };
 
-  const fetchData = async (page) => {
+  const fetchData = async (page, query = "") => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:9000/api/content?page=${page}&limit=10`
-      );
+      const endpoint = query
+        ? `http://localhost:9000/api/search?query=${encodeURIComponent(
+            query
+          )}&page=${page}&limit=10`
+        : `http://localhost:9000/api/content?page=${page}&limit=10`;
+      const response = await axios.get(endpoint);
 
       setContent(response.data.data);
       console.log(response.data);
@@ -51,11 +46,10 @@ function App() {
   const handleSave = async () => {
     await axios.put(`http://localhost:9000/api/content/${editItem.id}`, form);
     setEditItem(null);
-    // fetchContent();
+    fetchData();
   };
 
   useEffect(() => {
-    // fetchContent();
     fetchData(page);
   }, [page]);
 
@@ -68,13 +62,52 @@ function App() {
   return (
     <div>
       <h1>Content Management System</h1>
-      {/* <input
+      <input
         type="text"
         placeholder="Search..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-      /> */}
-      {/* <button onClick={() => fetchContent(search)}>Search</button> */}
+      />
+      <button onClick={() => fetchData(page, search)}>Search</button>
+      {editItem && (
+        <div>
+          <h2>Edit Content</h2>
+          <input
+            type="text"
+            placeholder="First Word"
+            value={form.word_first_lang}
+            onChange={(e) =>
+              setForm({ ...form, word_first_lang: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            placeholder="First Sentence"
+            value={form.sentence_first_lang}
+            onChange={(e) =>
+              setForm({ ...form, sentence_first_lang: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            placeholder="Second Word"
+            value={form.word_second_lang}
+            onChange={(e) =>
+              setForm({ ...form, word_second_lang: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            placeholder="Second Sentence"
+            value={form.sentence_second_lang}
+            onChange={(e) =>
+              setForm({ ...form, sentence_second_lang: e.target.value })
+            }
+          />
+          <button onClick={handleSave}>Save</button>
+          <button onClick={() => setEditItem(null)}>Cancel</button>
+        </div>
+      )}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -120,46 +153,6 @@ function App() {
           Next
         </button>
       </div>
-
-      {editItem && (
-        <div>
-          <h2>Edit Content</h2>
-          <input
-            type="text"
-            placeholder="First Word"
-            value={form.word_first_lang}
-            onChange={(e) =>
-              setForm({ ...form, word_first_lang: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="First Sentence"
-            value={form.sentence_first_lang}
-            onChange={(e) =>
-              setForm({ ...form, sentence_first_lang: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Second Word"
-            value={form.word_second_lang}
-            onChange={(e) =>
-              setForm({ ...form, word_second_lang: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Second Sentence"
-            value={form.sentence_second_lang}
-            onChange={(e) =>
-              setForm({ ...form, sentence_second_lang: e.target.value })
-            }
-          />
-          <button onClick={handleSave}>Save</button>
-          <button onClick={() => setEditItem(null)}>Cancel</button>
-        </div>
-      )}
     </div>
   );
 }

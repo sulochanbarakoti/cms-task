@@ -32,17 +32,47 @@ router.get("/content", (req, res) => {
 });
 
 // Search content
+// router.get("/search", (req, res) => {
+//   const { query } = req.query;
+//   console.log(res.query);
+//   db.all(
+//     `SELECT * FROM content WHERE sentence_first_lang LIKE ? OR sentence_second_lang LIKE ?`,
+//     [`%${query}%`, `%${query}%`],
+//     (err, rows) => {
+//       if (err) {
+//         res.status(500).json({ error: err.message });
+//       } else {
+//         res.json(rows);
+//       }
+//     }
+//   );
+// });
+
 router.get("/search", (req, res) => {
-  const { query } = req.query;
-  console.log(query);
+  const { query, page = 1, limit = 10 } = req.query;
+  console.log(req.query);
+
+  if (!query) {
+    return res.status(400).json({ error: "Query parameter is required" });
+  }
+
+  const offset = (page - 1) * limit;
+
   db.all(
     `SELECT * FROM content WHERE sentence_first_lang LIKE ? OR sentence_second_lang LIKE ?`,
     [`%${query}%`, `%${query}%`],
     (err, rows) => {
       if (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Database error:", err.message);
+        res.status(500).json({ error: "Internal Server Error" });
       } else {
-        res.json(rows);
+        const paginatedRows = rows.slice(offset, offset + parseInt(limit));
+        res.json({
+          data: paginatedRows,
+          totalRecords: rows.length,
+          totalPages: Math.ceil(rows.length / limit),
+          page: parseInt(page),
+        });
       }
     }
   );
