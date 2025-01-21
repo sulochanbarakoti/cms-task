@@ -9,17 +9,26 @@ router.get("/content", (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const offset = (page - 1) * limit;
 
-  db.all(
-    `SELECT * FROM content LIMIT ? OFFSET ?`,
-    [Number(limit), offset],
-    (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-      } else {
-        res.json(rows);
-      }
+  db.get(`SELECT COUNT(*) as total FROM content`, (err, result) => {
+    if (err) {
+      console.error(err.message);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-  );
+
+    const totalRecords = result.total;
+    const totalPages = Math.ceil(totalRecords / limit);
+    db.all(
+      `SELECT * FROM content LIMIT ? OFFSET ?`,
+      [parseInt(limit), parseInt(offset)],
+      (err, rows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+        } else {
+          res.json({ data: rows, page: parseInt(page), totalPages });
+        }
+      }
+    );
+  });
 });
 
 // Search content
