@@ -40,7 +40,7 @@
     <pre><code>npm install</code></pre>
   </li>
   <li>Start the server:
-    <pre><code>npm run start</code></pre>
+    <pre><code>npx nodemon app.js</code></pre>
   </li>
 </ol>
 
@@ -53,7 +53,7 @@
     <pre><code>npm install</code></pre>
   </li>
   <li>Start the development server:
-    <pre><code>npm start</code></pre>
+    <pre><code>npm run dev</code></pre>
   </li>
 </ol>
 
